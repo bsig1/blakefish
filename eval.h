@@ -25,6 +25,7 @@ static U64 pawnKeys[2][64];
 // current pawn‐only key
 static U64 pawnHashKey;
 int get_eval(const Game *game);
-static U64 passedMaskWhite[64], passedMaskBlack[64];
+static U64 passed_mask_white[64], passed_mask_black[64];
+static U64 outpost_defenders[2][64], outpost_attackers[2][64];
 
 #endif //EVAL_H

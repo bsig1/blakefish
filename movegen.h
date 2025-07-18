@@ -10,7 +10,17 @@
 #include "gameboard.h"
 
 
+#define WHITE_KINGSIDE_OCCUPANCY_MASK     ((1ULL << 5)  | (1ULL << 6))
+#define BLACK_KINGSIDE_OCCUPANCY_MASK     ((1ULL << 61) | (1ULL << 62))
 
+#define WHITE_QUEENSIDE_OCCUPANCY_MASK    ((1ULL << 1)  | (1ULL << 2)  | (1ULL << 3))
+#define BLACK_QUEENSIDE_OCCUPANCY_MASK    ((1ULL << 57) | (1ULL << 58) | (1ULL << 59))
+
+#define WHITE_KINGSIDE_CONTROL_MASK       ((1ULL << 4)  | (1ULL << 5)  | (1ULL << 6))
+#define WHITE_QUEENSIDE_CONTROL_MASK      ((1ULL << 2)  | (1ULL << 3)  | (1ULL << 4))
+
+#define BLACK_KINGSIDE_CONTROL_MASK       ((1ULL << 60) | (1ULL << 61) | (1ULL << 62))
+#define BLACK_QUEENSIDE_CONTROL_MASK      ((1ULL << 58) | (1ULL << 59) | (1ULL << 60))
 
 
 // Returns possible moves for a piece at 'start' square

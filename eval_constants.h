@@ -42,7 +42,6 @@
 extern int piece_square_table_middlegame[2][6][64];
 extern int piece_square_table_endgame[2][6][64];
 extern int passed_bonus[2][8];
-extern U64 knight_outpost_defenders[2][64];
-extern U64 knight_outpost_attackers[2][64];
+extern int outpost_bonus[2][64];
 
 #endif //EVAL_CONSTANTS_H

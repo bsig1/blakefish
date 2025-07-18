@@ -3,6 +3,7 @@
 //
 
 #include "game_tree.h"
+#include "eval.h"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -307,6 +308,7 @@ U64 perft(Game *game, const int depth) {
 	int move_count = 0;
 	Move* moves = malloc(sizeof(Move) * MAX_MOVES);
 	get_possible_moves(game, moves, &move_count);
+	get_eval(game);
 
 
 	U64 nodes = 0;

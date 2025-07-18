@@ -284,7 +284,7 @@ int piece_square_table_endgame[2][6][64] = {
     }
 };
 
-int knight_outpost_bonus[2][64] = {
+int outpost_bonus[2][64] = {
 	{ // WHITE
 		0,   0,   0,   0,   0,   0,   0,   0,
 		0,   0,   0,   0,   0,   0,   0,   0,
@@ -330,43 +330,3 @@ int passed_bonus[2][8] = {
 	0     // rank8
 	 }
 };
-
-U64 knight_outpost_defenders[2][64];
-U64 knight_outpost_attackers[2][64];
-
-void init_outpost_masks() {
-	for (int square = 0; square < 64; ++square) {
-		const int file = square % 8;
-		const int rank = square / 8;
-
-		knight_outpost_attackers[White][square] = 0ULL;
-		knight_outpost_attackers[Black][square] = 0ULL;
-		knight_outpost_defenders[White][square]  = 0ULL;
-		knight_outpost_defenders[Black][square]  = 0ULL;
-
-		// Knight outpost immunity: cannot be attacked by enemy pawns
-
-		// For White outposts: enemy black pawns attack from ahead (rank +1)
-		if (rank <= 5) {
-			if (file > 0) knight_outpost_attackers[White][square] |= 1ULL << (square + 7);
-			if (file < 7) knight_outpost_attackers[White][square] |= 1ULL << (square + 9);
-		}
-
-		// For Black outposts: enemy white pawns attack from behind (rank -1)
-		if (rank >= 2) {
-			if (file > 0) knight_outpost_attackers[Black][square] |= 1ULL << (square - 9);
-			if (file < 7) knight_outpost_attackers[Black][square] |= 1ULL << (square - 7);
-		}
-
-		// Knight guard squares: protected by friendly pawn from behind
-
-		// White pawns guard from rank -1
-		if (rank > 0)
-			knight_outpost_defenders[White][square] = 1ULL << (square - 8);
-
-		// Black pawns guard from rank +1
-		if (rank < 7)
-			knight_outpost_defenders[Black][square] = 1ULL << (square + 8);
-	}
-}
-;

@@ -36,16 +36,7 @@ static const U64 FILE_MASKS[8] = {
 	0x8080808080808080ULL  // File H
 };
 
-static const U64 WHITE_KINGSIDE_OCCUPANCY_MASK    = (1ULL<<5)  | (1ULL<<6);
-static const U64 BLACK_KINGSIDE_OCCUPANCY_MASK    = (1ULL<<61) | (1ULL<<62);
 
-static const U64 WHITE_QUEENSIDE_OCCUPANCY_MASK = (1ULL<<1) | (1ULL<<2)  | (1ULL<<3);
-static const U64 BLACK_QUEENSIDE_OCCUPANCY_MASK = (1ULL<<57) | (1ULL<<58) | (1ULL<<59);
-
-static const U64 WHITE_KINGSIDE_CONTROL_MASK      = (1ULL<<4)|(1ULL<<5)|(1ULL<<6);
-static const U64 WHITE_QUEENSIDE_CONTROL_MASK   = (1ULL<<2)|(1ULL<<3)|(1ULL<<4);
-static const U64 BLACK_KINGSIDE_CONTROL_MASK      = (1ULL<<60)|(1ULL<<61)|(1ULL<<62);
-static const U64 BLACK_QUEENSIDE_CONTROL_MASK   = (1ULL<<58)|(1ULL<<59)|(1ULL<<60);
 
 
 typedef struct {

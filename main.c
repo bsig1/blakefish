@@ -21,9 +21,6 @@ void print_perft(Game *game, const int depth) {
 		depth, nodes, secs, (double)nodes/1000.0/secs);
 }
 
-void print_eval(const Game *game,const int depth) {
-	printf("Current evaluation: %d\n",get_eval(game));
-}
 
 
 int main() {
