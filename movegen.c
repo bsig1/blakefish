@@ -28,16 +28,12 @@ static bool en_passant_is_legal(const int king_sq, const int captured_pawn_sq, c
 	return true; // legal
 }
 
-static U64 generate_white_pawn_moves(const int square,
-                                             const int king_sq,
-                                             const Game *game,
-                                             const Gameboard *board,
-                                             const Bitboards *bb) {
+static U64 generate_white_pawn_moves(const int square,const int king_sq,const Game *game,const Gameboard *board){
     const U64 occ            = occupied_squares(board);
     const U64 enemy          = board->black_pieces;
-    const U64 push_mask      = bb->white_pawn_pushes[square];
-    const U64 double_push    = bb->white_pawn_double_pushes[square];
-    const U64 attack_mask    = bb->white_pawn_attacks[square];
+    const U64 push_mask      = white_pawn_pushes[square];
+    const U64 double_push    = white_pawn_double_pushes[square];
+    const U64 attack_mask    = white_pawn_attacks[square];
     const U64 ep_mask        = game->legal_enpassant_squares;
 
     // Single push
@@ -63,7 +59,7 @@ static U64 generate_white_pawn_moves(const int square,
 
         if (en_passant_is_legal(king_sq, captured_sq, occ,
                                 enemy_rooks, enemy_queens,
-                                bb->rook_magic_attack_table)) {
+                                rook_magic_attack_table)) {
             moves |= 1ULL << target;
         }
     }
@@ -73,16 +69,12 @@ static U64 generate_white_pawn_moves(const int square,
 }
 
 
-static U64 generate_black_pawn_moves(const int square,
-                                             const int king_sq,
-                                             const Game *game,
-                                             const Gameboard *board,
-                                             const Bitboards *bb) {
+static U64 generate_black_pawn_moves(const int square,const int king_sq,const Game *game,const Gameboard *board){
     const U64 occ            = occupied_squares(board);
     const U64 enemy          = board->white_pieces;
-    const U64 push_mask      = bb->black_pawn_pushes[square];
-    const U64 double_push    = bb->black_pawn_double_pushes[square];
-    const U64 attack_mask    = bb->black_pawn_attacks[square];
+    const U64 push_mask      = black_pawn_pushes[square];
+    const U64 double_push    = black_pawn_double_pushes[square];
+    const U64 attack_mask    = black_pawn_attacks[square];
     const U64 ep_mask        = game->legal_enpassant_squares;
 
     // Single push
@@ -108,7 +100,7 @@ static U64 generate_black_pawn_moves(const int square,
 
         if (en_passant_is_legal(king_sq, captured_sq, occ,
                                 enemy_rooks, enemy_queens,
-                                bb->rook_magic_attack_table)) {
+                                rook_magic_attack_table)) {
             moves |= 1ULL << target;
         }
     }
@@ -145,7 +137,7 @@ static U64 generate_castling_moves(const int king_sq, const Color color, const U
 	return moves;
 }
 
-bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move_buffer, int *move_count) {
+bool get_possible_moves(const Game *game, Move* move_buffer, int *move_count) {
 	*move_count = 0;
 
 	const Gameboard *board = game->board;
@@ -188,7 +180,7 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 	current_pieces = enemy_bitboard&game->board->kings;
 	while (current_pieces) {
 		square = pop_lsb(&current_pieces);
-		attacks = bitboards->king_moves[square];
+		attacks = king_moves[square];
 		controlled_squares |= attacks;
 		if (attacks&king_sq) {
 			checks[check_count] = square;
@@ -201,7 +193,7 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 	current_pieces = enemy_bitboard&game->board->knights;
 	while (current_pieces) {
 		square = pop_lsb(&current_pieces);
-		attacks = bitboards->knight_moves[square];
+		attacks = knight_moves[square];
 		controlled_squares |= attacks;
 		if (attacks&king_sq) {
 			checks[check_count] = square;
@@ -215,11 +207,11 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 	while (current_pieces) {
 		square = pop_lsb(&current_pieces);
 		if (game->turn==White) {
-			attacks = bitboards->black_pawn_attacks[square];
+			attacks = black_pawn_attacks[square];
 			controlled_squares |= attacks;
 		}
 		else {
-			attacks = bitboards->white_pawn_attacks[square];
+			attacks = white_pawn_attacks[square];
 			controlled_squares |= attacks;
 		}
 
@@ -235,9 +227,9 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 	while (current_pieces) {
 		square = pop_lsb(&current_pieces);
 		blockers = (occupied&~king_sq) & bishop_masks[square];
-		attacks = bitboards->bishop_magic_attack_table[square][get_magic_index(square, blockers, Bishop)];
+		attacks = bishop_magic_attack_table[square][get_magic_index(square, blockers, Bishop)];
 		controlled_squares |= attacks;
-		attacking_ray = bitboards->bishop_rays[king][square];
+		attacking_ray = bishop_rays[king][square];
 
 		if (attacks&king_sq) {
 			checks[check_count] = square;
@@ -262,9 +254,9 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 	while (current_pieces) {
 		square = pop_lsb(&current_pieces);
 		blockers = (occupied&~king_sq) & rook_masks[square];
-		attacks = bitboards->rook_magic_attack_table[square][get_magic_index(square, blockers, Rook)];
+		attacks = rook_magic_attack_table[square][get_magic_index(square, blockers, Rook)];
 		controlled_squares |= attacks;
-		attacking_ray = bitboards->rook_rays[king][square];
+		attacking_ray = rook_rays[king][square];
 
 		if (attacks&king_sq) {
 			checks[check_count] = square;
@@ -289,14 +281,14 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 	while (current_pieces) {
 		square = pop_lsb(&current_pieces);
 		blockers = (occupied&~king_sq) & bishop_masks[square];
-		attacks = bitboards->bishop_magic_attack_table[square][get_magic_index(square, blockers, Bishop)];
+		attacks = bishop_magic_attack_table[square][get_magic_index(square, blockers, Bishop)];
 		controlled_squares |= attacks;
 
 		blockers = (occupied&~king_sq) & rook_masks[square];
-		attacks |= bitboards->rook_magic_attack_table[square][get_magic_index(square, blockers, Rook)];
+		attacks |= rook_magic_attack_table[square][get_magic_index(square, blockers, Rook)];
 		controlled_squares |= attacks;
 
-		attacking_ray = bitboards->bishop_rays[king][square] | bitboards->rook_rays[king][square];
+		attacking_ray = bishop_rays[king][square] | rook_rays[king][square];
 		if (attacks&king_sq) {
 			checks[check_count] = square;
 			check_rays[check_count] = attacking_ray;
@@ -323,7 +315,7 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 		current_pieces = friendly_bitboard&game->board->knights;
 		while (current_pieces) {
 			square = pop_lsb(&current_pieces);
-			attacks = bitboards->knight_moves[square];
+			attacks = knight_moves[square];
 
 			attacks &= ~friendly_bitboard; // Cannot move to a square your color occupies
 			piece_on_board = 1ULL << square;
@@ -355,9 +347,9 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 		while (current_pieces) {
 			square = pop_lsb(&current_pieces);
 			if (game->turn==White) {
-				attacks = generate_white_pawn_moves(square,king,game,board,bitboards);
+				attacks = generate_white_pawn_moves(square,king,game,board);
 			} else {
-				attacks = generate_black_pawn_moves(square,king,game,board,bitboards);
+				attacks = generate_black_pawn_moves(square,king,game,board);
 			}
 
 			attacks &= ~friendly_bitboard; // Cannot move to a square your color occupies
@@ -399,7 +391,7 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 		while (current_pieces) {
 			square = pop_lsb(&current_pieces);
 			blockers = occupied & bishop_masks[square];
-			attacks = bitboards->bishop_magic_attack_table[square][get_magic_index(square, blockers, Bishop)];
+			attacks = bishop_magic_attack_table[square][get_magic_index(square, blockers, Bishop)];
 			attacks &= ~friendly_bitboard;// Cannot move to a square your color occupies
 			piece_on_board = 1ULL << square;
 
@@ -430,7 +422,7 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 		while (current_pieces) {
 			square = pop_lsb(&current_pieces);
 			blockers = occupied & rook_masks[square];
-			attacks = bitboards->rook_magic_attack_table[square][get_magic_index(square, blockers, Rook)];
+			attacks = rook_magic_attack_table[square][get_magic_index(square, blockers, Rook)];
 			attacks &= ~friendly_bitboard;// Cannot move to a square your color occupies
 			piece_on_board = 1ULL << square;
 
@@ -461,9 +453,9 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 		while (current_pieces) {
 			square = pop_lsb(&current_pieces);
 			blockers = occupied & bishop_masks[square];
-			attacks = bitboards->bishop_magic_attack_table[square][get_magic_index(square, blockers, Bishop)];
+			attacks = bishop_magic_attack_table[square][get_magic_index(square, blockers, Bishop)];
 			blockers = occupied & rook_masks[square];
-			attacks |= bitboards->rook_magic_attack_table[square][get_magic_index(square, blockers, Rook)];
+			attacks |= rook_magic_attack_table[square][get_magic_index(square, blockers, Rook)];
 
 			attacks &= ~friendly_bitboard;// Cannot move to a square your color occupies
 			piece_on_board = 1ULL << square;
@@ -492,7 +484,7 @@ bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move
 	}
 
 	// King
-	attacks = bitboards->king_moves[king];
+	attacks = king_moves[king];
 
 	attacks &= ~friendly_bitboard; // Cannot move to a square your color occupies
 	attacks &= ~controlled_squares; // Cannot move into check
@@ -516,11 +508,11 @@ void print_moves(const Move *moves, const int size) {
 	}
 }
 
-void print_legal_moves(const Game *game, const Bitboards *piece_bitboards) {
+void print_legal_moves(const Game *game) {
 	int move_count = 0;
 	Move *moves = malloc(sizeof(Move) * MAX_MOVES);
 	if (moves==NULL)return;
-	get_possible_moves(game, piece_bitboards,moves, &move_count);
+	get_possible_moves(game,moves, &move_count);
 	print_moves(moves, move_count);
 	printf("Total moves: %d",move_count);
 }

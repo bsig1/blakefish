@@ -256,7 +256,7 @@ static int score_piece_middlegame(U64 bitboard, const int piece, const int color
 
 	while (bitboard) {
 		square = pop_lsb(&bitboard);
-		score+= PIECE_SQUARE_TABLE_MIDDLEGAME[color][piece][square];
+		score+= piece_square_table_middlegame[color][piece][square];
 	}
 	return score;
 }
@@ -267,7 +267,7 @@ static int score_knights(U64 bitboard,const U64 enemy_pawns, const U64 friendly_
 
 	while (bitboard) {
 		square = pop_lsb(&bitboard);
-		score+= PIECE_SQUARE_TABLE_MIDDLEGAME[color][Knight][square];
+		score+= piece_square_table_middlegame[color][Knight][square];
 		if (color==White) {
 			if (KNIGHT_OUTPOST_IMMUNE_WHITE[square] & (~enemy_pawns) && KNIGHT_OUTPOST_IMMUNE_WHITE[square]&friendly_pawns) {
 				score+=KNIGHT_OUTPOST_BONUS[color][square];
@@ -288,7 +288,7 @@ static int score_rooks(U64 bitboard,const U64 enemy_pawns,const U64 friendly_paw
 
 	while (bitboard) {
 		square = pop_lsb(&bitboard);
-		score+= PIECE_SQUARE_TABLE_MIDDLEGAME[color][Rook][square];
+		score+= piece_square_table_middlegame[color][Rook][square];
 		if (color==White) {
 			const U64 file = FILE_MASKS[square&7]; // &7 is equivalent to %8
 			if (!(friendly_pawns&file)) {

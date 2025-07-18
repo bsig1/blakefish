@@ -10,7 +10,24 @@
 #include "gameboard.h"
 #include "magic.h"
 
+U64 knight_moves [64];
+U64 king_moves [64];
 
+U64 white_pawn_pushes [64];
+U64 white_pawn_double_pushes [64];
+U64 white_pawn_attacks [64];
+
+U64 black_pawn_pushes [64];
+U64 black_pawn_double_pushes [64];
+U64 black_pawn_attacks [64];
+
+U64** bishop_magic_attack_table;
+U64** rook_magic_attack_table;
+int bishop_table_sizes[64];
+int rook_table_sizes[64];
+
+U64 rook_rays[64][64]; // First index is the start, second index is the end.
+U64 bishop_rays[64][64];
 
 U64 knight_movegen(const U64 knight) {
 	U64 l1 = (knight >> 1) & ~FILE_H;
@@ -273,39 +290,37 @@ U64 generate_bishop_ray(int start, int end) {
 	return ray;
 }
 
-Bitboards* init_bitboards() {
-	Bitboards *bitboards = malloc(sizeof(Bitboards));
+void init_bitboards() {
 	for (int rank = 0; rank < 8; rank++) {
 		for (int file = 0; file < 8; file++) {
 			const int square = rank * 8 + file;
 			const U64 bb = 1ULL << square;
 
-			bitboards->knight_moves[square] = knight_movegen(bb);
-			bitboards->king_moves[square] = king_movegen(bb);
+			knight_moves[square] = knight_movegen(bb);
+			king_moves[square] = king_movegen(bb);
 
-			bitboards->white_pawn_pushes[square] = generate_pawn_pushes(bb, White);
-			bitboards->white_pawn_double_pushes[square] = generate_pawn_double_pushes(bb, White);
-			bitboards->white_pawn_attacks[square] = generate_pawn_attacks(bb, White);
+			white_pawn_pushes[square] = generate_pawn_pushes(bb, White);
+			white_pawn_double_pushes[square] = generate_pawn_double_pushes(bb, White);
+			white_pawn_attacks[square] = generate_pawn_attacks(bb, White);
 
-			bitboards->black_pawn_pushes[square] = generate_pawn_pushes(bb, Black);
-			bitboards->black_pawn_double_pushes[square] = generate_pawn_double_pushes(bb, Black);
-			bitboards->black_pawn_attacks[square] = generate_pawn_attacks(bb, Black);
+			black_pawn_pushes[square] = generate_pawn_pushes(bb, Black);
+			black_pawn_double_pushes[square] = generate_pawn_double_pushes(bb, Black);
+			black_pawn_attacks[square] = generate_pawn_attacks(bb, Black);
 		}
 	}
-	bitboards->bishop_magic_attack_table = build_magic_attack_table(bishop_magics, bishop_shifts, generate_bishop_mask,
+	bishop_magic_attack_table = build_magic_attack_table(bishop_magics, bishop_shifts, generate_bishop_mask,
 																	bishop_moves_onthefly,
-																	bitboards->bishop_table_sizes);
-	bitboards->rook_magic_attack_table = build_magic_attack_table(rook_magics, rook_shifts, generate_rook_mask,
-																  rook_moves_onthefly, bitboards->rook_table_sizes);
+																	bishop_table_sizes);
+	rook_magic_attack_table = build_magic_attack_table(rook_magics, rook_shifts, generate_rook_mask,
+																  rook_moves_onthefly, rook_table_sizes);
 
 
 	for (int start = 0; start < 64; start++) {
 		for (int end = 0; end < 64; end++) {
-			bitboards->bishop_rays[start][end] = generate_bishop_ray(start, end);
-			bitboards->rook_rays[start][end] = generate_rook_ray(start, end);
+			bishop_rays[start][end] = generate_bishop_ray(start, end);
+			rook_rays[start][end] = generate_rook_ray(start, end);
 		}
 	}
-	return bitboards;
 }
 
 void free_magic_attack_table(U64 **table, const int table_lengths) {
@@ -317,12 +332,9 @@ void free_magic_attack_table(U64 **table, const int table_lengths) {
 	free(table); // free the outer pointer
 }
 
-void free_piece_bitboards(Bitboards *bitboards) {
-	free_magic_attack_table(bitboards->bishop_magic_attack_table, 64);
-	free_magic_attack_table(bitboards->rook_magic_attack_table, 64);
-	free(bitboards->bishop_table_sizes);
-	free(bitboards->rook_table_sizes);
-	free(bitboards);
+void free_magic_tables() {
+	if (bishop_magic_attack_table) free_magic_attack_table(bishop_magic_attack_table, 64);
+	if (rook_magic_attack_table) free_magic_attack_table(rook_magic_attack_table, 64);
 }
 
 int get_magic_index(const int square, const U64 blockers, const Piece piece) {

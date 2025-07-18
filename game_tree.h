@@ -42,10 +42,10 @@ Game* init_game();
 Game* init_startpos_game();
 
 void make_move(const Move* move, Game *game);
-Game_Tree_Node* generate_game_tree(Game* game, const Bitboards* bitboards, int max_depth, int* total_count);
+Game_Tree_Node* generate_game_tree(Game* game, int max_depth, int* total_count);
 void print_tree(const Game_Tree_Node *node, int depth);
-U64 perft(Game* game, const Bitboards* bitboards, int depth);
-void perft_divide(Game* game, const Bitboards* bitboards, int depth);
+U64 perft(Game* game, int depth);
+void perft_divide(Game* game, int depth);
 void make_move_str(const char* str, Game* game);
 void make_moves_str(const char* str, Game* game);
 bool set_board_from_fen(Game *game, const char *fen);

@@ -12,16 +12,13 @@
 
 
 
-// Returns all marked bits on a board
-int *get_marked_squares(const U64 bitboard, int *size);
-
 
 // Returns possible moves for a piece at 'start' square
-bool get_possible_moves(const Game *game, const Bitboards *bitboards, Move* move_buffer, int *move_count);
+bool get_possible_moves(const Game *game, Move* move_buffer, int *move_count);
 
 // Prints a list of moves to stdout
 void print_moves(const Move* moves, int size);
-void print_legal_moves(const Game *game, const Bitboards *piece_bitboards);
+void print_legal_moves(const Game *game);
 
 
 #endif //MOVE_GEN_H

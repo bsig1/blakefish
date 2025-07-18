@@ -28,6 +28,8 @@ add_executable(blakefish
 		eval.h
 		bitboards.c
 		bitboards.h
+		eval_constants.c
+		eval_constants.h
 )
 
 # (Optional) Modern target-specific approach instead of global flags:

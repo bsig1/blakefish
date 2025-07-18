@@ -11,27 +11,25 @@
 
 
 
-typedef struct {
-	U64 knight_moves [64];
-	U64 king_moves [64];
+extern U64 knight_moves [64];
+extern U64 king_moves [64];
 
-	U64 white_pawn_pushes [64];
-	U64 white_pawn_double_pushes [64];
-	U64 white_pawn_attacks [64];
+extern U64 white_pawn_pushes [64];
+extern U64 white_pawn_double_pushes [64];
+extern U64 white_pawn_attacks [64];
 
-	U64 black_pawn_pushes [64];
-	U64 black_pawn_double_pushes [64];
-	U64 black_pawn_attacks [64];
+extern U64 black_pawn_pushes [64];
+extern U64 black_pawn_double_pushes [64];
+extern U64 black_pawn_attacks [64];
 
-	U64** bishop_magic_attack_table;
-	U64** rook_magic_attack_table;
-	int bishop_table_sizes[64];
-	int rook_table_sizes[64];
+extern U64** bishop_magic_attack_table;
+extern U64** rook_magic_attack_table;
+extern int bishop_table_sizes[64];
+extern int rook_table_sizes[64];
 
-	U64 rook_rays[64][64]; // First index is the start, second index is the end.
-	U64 bishop_rays[64][64];
+extern U64 rook_rays[64][64]; // First index is the start, second index is the end.
+extern U64 bishop_rays[64][64];
 
-} Bitboards;
 
 
 
@@ -55,8 +53,8 @@ U64 generate_bishop_mask(int square);
 void print_bitboard(U64 piece_bitboard);
 
 // Piece_Bitboards init & cleanup
-Bitboards* init_bitboards();
-void free_piece_bitboards(Bitboards* bitboards);
+void init_bitboards();
+void free_magic_tables();
 
 // Lookup
 int get_magic_index(int square, U64 blockers,Piece piece);

@@ -35,7 +35,6 @@ void make_move(const Move* move, Game *game) {
 
 	const Piece moving_piece = get_square_piece(start_sq, board);
 	const Piece captured_piece = get_square_piece(end_sq, board);
-	const Color captured_color = (board->white_pieces & (1ULL << end)) ? White : Black;
 
 	bool is_en_passant = false;
 	if (moving_piece == Pawn && (1ULL << end) & game->legal_enpassant_squares) {
@@ -195,7 +194,6 @@ Game* copy_game(const Game* original) {
 }
 
 static Game_Tree_Node* _build_tree(const Game *game,
-                                   const Bitboards *bb,
                                    Move in_move,
                                    int depth,
                                    U64 *out_count) {
@@ -215,7 +213,7 @@ static Game_Tree_Node* _build_tree(const Game *game,
     // Generate all legal moves from here
     int mv_count = 0;
 	Move *mv_list = malloc(sizeof(Move) *MAX_MOVES);
-    get_possible_moves(game, bb, mv_list, &mv_count);
+    get_possible_moves(game, mv_list, &mv_count);
     if (mv_count == 0) {
         // no moves → also a leaf (e.g. checkmate or stalemate)
         node->count = 1;
@@ -237,7 +235,7 @@ static Game_Tree_Node* _build_tree(const Game *game,
 
         // recurse
         Game_Tree_Node *child_node = _build_tree(
-            child_game, bb, mv_list[i], depth - 1, &subtotal);
+            child_game, mv_list[i], depth - 1, &subtotal);
 
         // record
         node->children[i] = child_node;
@@ -257,7 +255,6 @@ static Game_Tree_Node* _build_tree(const Game *game,
 // Public entry point.  'game' is assumed to be at the root position, and
 // total_count will be set to the perft(game, depth) value.
 Game_Tree_Node* generate_game_tree(Game* game,
-                                   const Bitboards* bitboards,
                                    int max_depth,
                                    int *total_count)
 {
@@ -265,7 +262,7 @@ Game_Tree_Node* generate_game_tree(Game* game,
     Move null_move = { .start = -1, .end = -1, .promotion = Empty };
     U64 count = 0;
 
-    Game_Tree_Node *root = _build_tree(game, bitboards, null_move,
+    Game_Tree_Node *root = _build_tree(game, null_move,
                                        max_depth, &count);
     root->move = null_move;        // make sure root.move is “empty”
     *total_count = (int)count;
@@ -304,12 +301,12 @@ void free_game(Game* game) {
 	free(game);
 }
 
-U64 perft(Game *game, const Bitboards *bitboards, const int depth) {
+U64 perft(Game *game, const int depth) {
 	if (depth == 0) return 1;
 
 	int move_count = 0;
 	Move* moves = malloc(sizeof(Move) * MAX_MOVES);
-	get_possible_moves(game, bitboards, moves, &move_count);
+	get_possible_moves(game, moves, &move_count);
 
 
 	U64 nodes = 0;
@@ -322,7 +319,7 @@ U64 perft(Game *game, const Bitboards *bitboards, const int depth) {
 		make_move(&moves[i], game);
 
 		// 3) recurse into the clone
-		nodes += perft(game, bitboards, depth - 1);
+		nodes += perft(game, depth - 1);
 
 		// 4) clean up
 		load_game_state(game, &snapshot);
@@ -331,10 +328,10 @@ U64 perft(Game *game, const Bitboards *bitboards, const int depth) {
 	return nodes;
 }
 
-void perft_divide(Game* game, const Bitboards* bitboards, int depth) {
+void perft_divide(Game* game, int depth) {
 	int move_count = 0;
 	Move* moves = malloc(sizeof(Move) * MAX_MOVES);
-	get_possible_moves(game, bitboards, moves, &move_count);
+	get_possible_moves(game, moves, &move_count);
 	U64 total = 0;
 
 	for (int i = 0; i < move_count; i++) {
@@ -342,7 +339,7 @@ void perft_divide(Game* game, const Bitboards* bitboards, int depth) {
 		save_game_state(game, &snapshot);
 
 		make_move(&moves[i], game);
-		U64 count = perft(game, bitboards, depth-1);
+		U64 count = perft(game, depth-1);
 		load_game_state(game, &snapshot);
 
 		// Convert move to algebraic
