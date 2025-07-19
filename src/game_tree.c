@@ -194,7 +194,7 @@ Game* copy_game(const Game* original) {
 	return copy;
 }
 
-static Game_Tree_Node* _build_tree(const Game *game,
+static Game_Tree_Node* _build_tree(Game *game,
                                    Move in_move,
                                    int depth,
                                    U64 *out_count) {
@@ -208,6 +208,7 @@ static Game_Tree_Node* _build_tree(const Game *game,
     if (depth == 0) {
         node->count = 1;
         *out_count = 1;
+    	node->eval = get_eval(game);
         return node;
     }
 
@@ -226,29 +227,31 @@ static Game_Tree_Node* _build_tree(const Game *game,
     // Allocate children array
     node->children = malloc(sizeof(*node->children) * mv_count);
     node->child_count = mv_count;
+	node->eval = -1;
 
-    Game *child_game;
     U64 subtotal, grand_total = 0;
+	Game_State_Snapshot snapshot;
     for (int i = 0; i < mv_count; i++) {
         // clone position, play the move
-        child_game = copy_game(game);
-        make_move(&mv_list[i], child_game);
+    	save_game_state(game, &snapshot);
+
+        make_move(&mv_list[i], game);
 
         // recurse
         Game_Tree_Node *child_node = _build_tree(
-            child_game, mv_list[i], depth - 1, &subtotal);
+            game, mv_list[i], depth - 1, &subtotal);
 
         // record
         node->children[i] = child_node;
         grand_total += subtotal;
 
         // cleanup
-        free_game(child_game);
+        load_game_state(game, &snapshot);
     }
 
     free(mv_list);
 
-    node->count = grand_total;
+    node->count = (int)grand_total;
     *out_count = grand_total;
     return node;
 }
@@ -280,8 +283,8 @@ void print_tree(const Game_Tree_Node *node, int depth) {
 		}
 		// print move and count
 		if (c->child_count == 0) {
-			printf("%s\n",
-			   move_to_uci(&c->move));
+			printf("%s Eval: %.2f\n",
+			   move_to_uci(&c->move),(double)c->eval/100);
 		}
 		else {
 			printf("%s: %llu\n",
@@ -308,7 +311,6 @@ U64 perft(Game *game, const int depth) {
 	int move_count = 0;
 	Move* moves = malloc(sizeof(Move) * MAX_MOVES);
 	get_possible_moves(game, moves, &move_count);
-	get_eval(game);
 
 
 	U64 nodes = 0;

@@ -88,6 +88,13 @@ typedef enum {
 	H
 } File;
 
+typedef enum {
+	Normal,
+	Stalemate,
+	Checkmate,
+	ERROR
+}Game_State;
+
 typedef struct {
 	File file;
 	int rank;

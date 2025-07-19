@@ -18,14 +18,8 @@ typedef struct Game_Tree_Node{
 	struct Game_Tree_Node** children;
 	int child_count;
 	int count;
+	int eval;
 } Game_Tree_Node;
-
-typedef struct Stack_Item {
-	Game game;
-	Game_Tree_Node* node;
-	int depth;
-} Stack_Item;
-
 
 
 typedef struct {

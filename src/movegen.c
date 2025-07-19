@@ -137,8 +137,11 @@ static U64 generate_castling_moves(const int king_sq, const Color color, const U
 	return moves;
 }
 
-bool get_possible_moves(const Game *game, Move* move_buffer, int *move_count) {
+Game_State get_possible_moves(const Game *game, Move* move_buffer, int *move_count) {
 	*move_count = 0;
+	if (game==NULL) {
+		return ERROR;
+	}
 
 	const Gameboard *board = game->board;
 	const U64 occupied = occupied_squares(board);
@@ -497,7 +500,15 @@ bool get_possible_moves(const Game *game, Move* move_buffer, int *move_count) {
 		move_buffer[(*move_count)++] = move;
 	}
 
-	return (bool)move_count;
+	if ((*move_count)==0){
+		if (checks[0]) {
+			return Checkmate;
+		}
+		else {
+			return Stalemate;
+		}
+	}
+	return Normal;
 }
 
 void print_moves(const Move *moves, const int size) {
@@ -515,4 +526,5 @@ void print_legal_moves(const Game *game) {
 	get_possible_moves(game,moves, &move_count);
 	print_moves(moves, move_count);
 	printf("Total moves: %d",move_count);
+	free(moves);
 }

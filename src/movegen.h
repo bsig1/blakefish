@@ -24,7 +24,7 @@
 
 
 // Returns possible moves for a piece at 'start' square
-bool get_possible_moves(const Game *game, Move* move_buffer, int *move_count);
+Game_State get_possible_moves(const Game *game, Move* move_buffer, int *move_count);
 
 // Prints a list of moves to stdout
 void print_moves(const Move* moves, int size);

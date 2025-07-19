@@ -8,7 +8,7 @@
 double now() {
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (double)ts.tv_sec + ts.tv_nsec*1e-9;
+	return (double)ts.tv_sec + (double)ts.tv_nsec*1e-9;
 }
 
 void print_perft(Game *game, const int depth) {
@@ -28,9 +28,12 @@ int main() {
 
 	Game *game = init_startpos_game();
 	init_bitboards();
-	make_moves_str("",game);
+	set_board_from_fen(game,"r1b2rk1/pp3ppp/2n1pn2/1B1q4/3P4/2N1PN2/PP3PPP/R2Q1RK1 w - - 0 12");
+	print_board(game->board);
 	print_eval(game,0);
-	print_perft(game,5);
+	int total_count = 0;
+	Game_Tree_Node *root = generate_game_tree(game,4,&total_count);
+	print_tree(root,0);
 
 	return 0;
 }
