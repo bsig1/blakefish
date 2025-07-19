@@ -1,0 +1,41 @@
+# CLion IDE project files (JetBrains)
+.idea/
+*.iml
+
+# Build directories
+cmake-build-*/
+build/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+compile_commands.json
+
+# Compiled object files and binaries
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.lib
+*.exe
+*.out
+*.bin
+
+# Precompiled headers
+*.gch
+*.pch
+
+# Core dumps and logs
+core
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Optional: CLion run configurations (if you don’t want to sync them)
+.idea/runConfigurations/
