@@ -120,9 +120,5 @@ Blakefish is primarily an exploration of:
 
 The project is intentionally implemented at a relatively low level to better understand the techniques used in modern chess engines.
 
-## License
-
-See the repository for licensing information.
-
 ```
 ```
