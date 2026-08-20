@@ -1,4 +1,3 @@
-````markdown
 # Blakefish
 
 Blakefish is a chess engine written from scratch in C.
